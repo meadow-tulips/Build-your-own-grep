@@ -1,9 +1,11 @@
 #include "grep_parser.hpp"
 #include <iostream>
 #include <vector>
+#include <cctype>
 
 std::vector<std::string> parseExpressionPattern(std::string expression);
 bool doesStringContainsNumber(const std::string &s);
+bool doesStringContainsAlphaNumericCharacter(const std::string &s);
 
 GREP::GREP_PARSER::GREP_PARSER(std::string exp) { expression = exp; }
 
@@ -21,15 +23,18 @@ bool GREP::GREP_PARSER::match_pattern(const std::string &input_line)
         {
             if (v[i] == "\\d")
             {
-                auto t = doesStringContainsNumber(input_line);
                 return doesStringContainsNumber(input_line);
+            }
+            else if (v[i] == "\\w")
+            {
+                return doesStringContainsAlphaNumericCharacter(input_line);
             }
             else
             {
                 throw std::runtime_error("Unhandled pattern " + v[i]);
             }
         }
-        return -1;
+        return 0;
     }
 }
 
@@ -60,11 +65,18 @@ bool doesStringContainsNumber(const std::string &s)
 {
     for (int i = 0; i < s.length(); i++)
     {
-        int asci_value = s[i];
-        if (s[i] > 47 && s[i] < 58)
-        {
+        if (isdigit(s[i]))
             return true;
-        }
+    }
+    return false;
+}
+
+bool doesStringContainsAlphaNumericCharacter(const std::string &s)
+{
+    for (int i = 0; i < s.length(); i++)
+    {
+        if (isalnum(s[i]))
+            return true;
     }
     return false;
 }
