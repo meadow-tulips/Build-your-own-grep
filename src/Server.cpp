@@ -1,20 +1,25 @@
 #include <iostream>
-#include <string>
+#include "Grep_Parser/grep_parser.hpp"
 
-bool match_pattern(const std::string& input_line, const std::string& pattern) {
-    if (pattern.length() == 1) {
+bool match_pattern(const std::string &input_line, const std::string &pattern)
+{
+    if (pattern.length() == 1)
+    {
         return input_line.find(pattern) != std::string::npos;
     }
-    else {
+    else
+    {
         throw std::runtime_error("Unhandled pattern " + pattern);
     }
 }
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[])
+{
     // You can use print statements as follows for debugging, they'll be visible when running tests.
     std::cout << "Logs from your program will appear here" << std::endl;
 
-    if (argc != 3) {
+    if (argc != 3)
+    {
         std::cerr << "Expected two arguments" << std::endl;
         return 1;
     }
@@ -22,7 +27,8 @@ int main(int argc, char* argv[]) {
     std::string flag = argv[1];
     std::string pattern = argv[2];
 
-    if (flag != "-E") {
+    if (flag != "-E")
+    {
         std::cerr << "Expected first argument to be '-E'" << std::endl;
         return 1;
     }
@@ -31,14 +37,22 @@ int main(int argc, char* argv[]) {
     //
     std::string input_line;
     std::getline(std::cin, input_line);
-    
-    try {
-        if (match_pattern(input_line, pattern)) {
+
+    GREP::GREP_PARSER parser(pattern);
+
+    try
+    {
+        if (parser.match_pattern(input_line))
+        {
             return 0;
-        } else {
+        }
+        else
+        {
             return 1;
         }
-    } catch (const std::runtime_error& e) {
+    }
+    catch (const std::runtime_error &e)
+    {
         std::cerr << e.what() << std::endl;
         return 1;
     }
