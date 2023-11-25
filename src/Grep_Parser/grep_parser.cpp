@@ -7,6 +7,7 @@ std::vector<std::string> parseExpressionPattern(std::string expression);
 bool doesStringContainsNumber(const std::string &s);
 bool doesStringContainsAlphaNumericCharacter(const std::string &s);
 bool doesStringContainsPositiveCharacterGroups(const std::string input_value, const std::string grp);
+bool doesStringContainsNegativeCharacterGroups(const std::string input_line, const std::string grp);
 
 GREP::GREP_PARSER::GREP_PARSER(std::string exp) { expression = exp; }
 
@@ -32,6 +33,8 @@ bool GREP::GREP_PARSER::match_pattern(const std::string &input_line)
             }
             else if (v[i][0] == '[' && v[i][v[i].length() - 1] == ']')
             {
+                if (v[i][1] == '^')
+                    return doesStringContainsNegativeCharacterGroups(input_line, v[i]);
                 return doesStringContainsPositiveCharacterGroups(input_line, v[i]);
             }
             else
@@ -98,6 +101,18 @@ bool doesStringContainsPositiveCharacterGroups(const std::string input_line, con
     for (int i = 1; i < grp.length() - 1; i++)
     {
         if (input_line.find(grp[i]) != std::string::npos)
+            return true;
+    }
+
+    return false;
+}
+
+bool doesStringContainsNegativeCharacterGroups(const std::string input_line, const std::string grp)
+{
+    std::string grpstring = grp.substr(2, grp.length() - 3);
+    for (int i = 0; i < input_line.length(); i++)
+    {
+        if (grpstring.find(input_line[i]) == std::string::npos)
             return true;
     }
 
