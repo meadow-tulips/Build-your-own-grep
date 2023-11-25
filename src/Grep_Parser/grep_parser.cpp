@@ -6,6 +6,7 @@
 std::vector<std::string> parseExpressionPattern(std::string expression);
 bool doesStringContainsNumber(const std::string &s);
 bool doesStringContainsAlphaNumericCharacter(const std::string &s);
+bool doesStringContainsPositiveCharacterGroups(const std::string input_value, const std::string grp);
 
 GREP::GREP_PARSER::GREP_PARSER(std::string exp) { expression = exp; }
 
@@ -29,6 +30,10 @@ bool GREP::GREP_PARSER::match_pattern(const std::string &input_line)
             {
                 return doesStringContainsAlphaNumericCharacter(input_line);
             }
+            else if (v[i][0] == '[' && v[i][v[i].length() - 1] == ']')
+            {
+                return doesStringContainsPositiveCharacterGroups(input_line, v[i]);
+            }
             else
             {
                 throw std::runtime_error("Unhandled pattern " + v[i]);
@@ -46,12 +51,19 @@ std::vector<std::string> parseExpressionPattern(std::string expression)
     for (int i = 0; i < expression.length(); i++)
     {
         int asci_value = expression[i];
-        if (asci_value == 92)
+        if (asci_value == 92 || asci_value == 91)
         {
             if (token.length())
                 tokens.push_back(token);
             token = "";
         }
+
+        if (asci_value == 93)
+        {
+            token += expression[i];
+            tokens.push_back(token);
+        }
+
         token += expression[i];
     }
 
@@ -78,5 +90,16 @@ bool doesStringContainsAlphaNumericCharacter(const std::string &s)
         if (isalnum(s[i]))
             return true;
     }
+    return false;
+}
+
+bool doesStringContainsPositiveCharacterGroups(const std::string input_line, const std::string grp)
+{
+    for (int i = 1; i < grp.length() - 1; i++)
+    {
+        if (input_line.find(grp[i]) != std::string::npos)
+            return true;
+    }
+
     return false;
 }
