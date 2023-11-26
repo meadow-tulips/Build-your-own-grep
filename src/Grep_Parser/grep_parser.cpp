@@ -39,6 +39,10 @@ bool GREP::GREP_PARSER::match_pattern(const std::string &input_line)
         else if (expression[0] == '^')
         {
             return input_line.find(expression.substr(1, expression.length() - 1)) != 0 ? false : true;
+        } else if(expression[expression.length() - 1] == '$') {
+            std::string expressionString = expression.substr(0, expression.length() - 1);
+
+            return input_line.find(expressionString) != input_line.length() - expressionString.length() ? false : true;
         }
         return doesStringContainsMatchedPattern(input_line, expression);
     }
