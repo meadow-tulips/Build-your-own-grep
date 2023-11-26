@@ -90,6 +90,17 @@ std::vector<std::string> parseExpressionPattern(std::string expression)
         {
             token = "[";
         }
+        else if (asci_value == 40)
+        {
+            if (token.length() > 0)
+                tokens.push_back(token);
+            token = "";
+        }
+        else if (asci_value == 41)
+        {
+            tokens.push_back(token);
+            token = "";
+        }
         else if (asci_value == 93)
         {
             token += "]";
@@ -172,6 +183,7 @@ bool recursivelyLookForPattern(const std::string input_line, std::vector<std::st
         return true;
     else if (index == 0)
     {
+
         if (v[index][0] == '.')
         {
 
@@ -242,6 +254,20 @@ bool recursivelyLookForPattern(const std::string input_line, std::vector<std::st
                 return true;
             else
                 return false;
+        }
+        else if (v[index].find('|') != std::string::npos)
+        {
+            auto ind = v[index].find('|');
+            std::string prefixString = v[index].substr(0, ind);
+            std::string suffixString = v[index].substr(ind + 1);
+
+            auto foundPrefixPosition = input_line.find(prefixString);
+            auto foundSuffixPosition = input_line.find(suffixString);
+
+            if (foundPrefixPosition == std::string::npos && foundSuffixPosition == std::string::npos)
+                return false;
+            else
+                return true;
         }
         else
         {
@@ -315,6 +341,20 @@ bool recursivelyLookForPattern(const std::string input_line, std::vector<std::st
             if (x != 0)
                 return false;
             return recursivelyLookForPattern(input_line.substr(1, input_line.length() - 1), v, index + 1);
+        }
+        else if (v[index].find('|') != std::string::npos)
+        {
+            auto ind = v[index].find('|');
+            std::string prefixString = v[index].substr(0, ind);
+            std::string suffixString = v[index].substr(ind + 1);
+
+            auto foundPrefixPosition = input_line.find(prefixString);
+            auto foundSuffixPosition = input_line.find(suffixString);
+
+            if (foundPrefixPosition == std::string::npos && foundSuffixPosition == std::string::npos)
+                return false;
+            else
+                return true;
         }
         else
         {
