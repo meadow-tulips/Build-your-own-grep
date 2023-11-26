@@ -60,6 +60,15 @@ std::vector<std::string> parseExpressionPattern(std::string expression)
         int asci_value = expression[i];
         if (asci_value == 92)
             continue;
+        if (asci_value == 46)
+        {
+            if (token.length())
+            {
+                tokens.push_back(token);
+                token = "";
+                token += expression[i];
+            }
+        }
         else if (asci_value == 43 || asci_value == 63)
         {
             tokens.push_back(expression.substr(i - 1, 2));
@@ -163,7 +172,24 @@ bool recursivelyLookForPattern(const std::string input_line, std::vector<std::st
         return true;
     else if (index == 0)
     {
-        if (v[index][v[index].length() - 1] == '?')
+        if (v[index][0] == '.')
+        {
+
+            std::string restExpressionString = v[index].substr(1);
+            auto foundSubstringPosition = input_line.find(restExpressionString);
+            if (foundSubstringPosition == std::string::npos || foundSubstringPosition != 0)
+                return false;
+            else
+            {
+                auto p = recursivelyLookForPattern(input_line.substr(foundSubstringPosition + restExpressionString.length() + 1, input_line.length() - restExpressionString.length() - foundSubstringPosition), v, index + 1);
+                auto q = recursivelyLookForPattern(input_line.substr(foundSubstringPosition + restExpressionString.length() + 1, input_line.length() - restExpressionString.length() - foundSubstringPosition), v, index);
+                if (p == true || q == true)
+                    return true;
+                else
+                    return false;
+            }
+        }
+        else if (v[index][v[index].length() - 1] == '?')
         {
             auto foundSubstringPosition = input_line.find(v[index][0]);
             if (foundSubstringPosition == std::string::npos)
@@ -224,8 +250,8 @@ bool recursivelyLookForPattern(const std::string input_line, std::vector<std::st
                 return false;
             else
             {
-                auto p = recursivelyLookForPattern(input_line.substr(foundSubstringPosition + 1, input_line.length() - v[index].length()), v, index + 1);
-                auto q = recursivelyLookForPattern(input_line.substr(foundSubstringPosition + 1, input_line.length() - v[index].length()), v, index);
+                auto p = recursivelyLookForPattern(input_line.substr(foundSubstringPosition + v[index].length(), input_line.length() - foundSubstringPosition - v[index].length()), v, index + 1);
+                auto q = recursivelyLookForPattern(input_line.substr(foundSubstringPosition + v[index].length(), input_line.length() - foundSubstringPosition - v[index].length()), v, index);
 
                 if (p == true || q == true)
                     return true;
@@ -236,6 +262,17 @@ bool recursivelyLookForPattern(const std::string input_line, std::vector<std::st
     }
     else
     {
+        if (v[index][0] == '.')
+        {
+            std::string restExpressionString = v[index].substr(1);
+            auto foundSubstringPosition = input_line.find(restExpressionString);
+            if (foundSubstringPosition == std::string::npos || foundSubstringPosition == 0)
+                return false;
+            else
+            {
+                return recursivelyLookForPattern(input_line.substr(foundSubstringPosition + restExpressionString.length(), input_line.length() - restExpressionString.length() - foundSubstringPosition), v, index + 1);
+            }
+        }
         if (v[index][v[index].length() - 1] == '?')
         {
             auto foundSubstringPosition = input_line.find(v[index][0]);
