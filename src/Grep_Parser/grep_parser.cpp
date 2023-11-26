@@ -39,7 +39,9 @@ bool GREP::GREP_PARSER::match_pattern(const std::string &input_line)
         else if (expression[0] == '^')
         {
             return input_line.find(expression.substr(1, expression.length() - 1)) != 0 ? false : true;
-        } else if(expression[expression.length() - 1] == '$') {
+        }
+        else if (expression[expression.length() - 1] == '$')
+        {
             std::string expressionString = expression.substr(0, expression.length() - 1);
 
             return input_line.find(expressionString) != input_line.length() - expressionString.length() ? false : true;
@@ -58,6 +60,10 @@ std::vector<std::string> parseExpressionPattern(std::string expression)
         int asci_value = expression[i];
         if (asci_value == 92)
             continue;
+        else if (asci_value == 43)
+        {
+            tokens.push_back(expression.substr(i - 1, 2));
+        }
         else if (i > 0 && expression[i - 1] == 92)
             tokens.push_back(expression.substr(i - 1, 2));
         else if (asci_value == 32)
@@ -79,6 +85,15 @@ std::vector<std::string> parseExpressionPattern(std::string expression)
         {
             token += "]";
             tokens.push_back(token);
+            token = "";
+        }
+        else if (i < expression.length() - 1 && expression[i + 1] == 43)
+        {
+
+            if (token.length() > 0)
+            {
+                tokens.push_back(token);
+            }
             token = "";
         }
         else
@@ -150,7 +165,22 @@ bool recursivelyLookForPattern(const std::string input_line, std::vector<std::st
         return false;
     else if (index == 0)
     {
-        if (v[index] == "\\d")
+        if (v[index][v[index].length() - 1] == '+')
+        {
+            auto foundSubstringPosition = input_line.find(v[index][0]);
+            if (foundSubstringPosition == std::string::npos)
+                return false;
+            else
+            {
+                auto p = recursivelyLookForPattern(input_line.substr(foundSubstringPosition + 1, input_line.length() - 1), v, index + 1);
+                auto q = recursivelyLookForPattern(input_line.substr(foundSubstringPosition + 1, input_line.length() - 1), v, index);
+                if (p == true || q == true)
+                    return true;
+                else
+                    return false;
+            }
+        }
+        else if (v[index] == "\\d")
         {
             int nextIndex = doesStringContainsNumber(input_line);
             if (nextIndex == -1)
@@ -181,8 +211,8 @@ bool recursivelyLookForPattern(const std::string input_line, std::vector<std::st
                 return false;
             else
             {
-                auto p = recursivelyLookForPattern(input_line.substr(foundSubstringPosition, input_line.length() - v[index].length()), v, index + 1);
-                auto q = recursivelyLookForPattern(input_line.substr(foundSubstringPosition, input_line.length() - v[index].length()), v, index);
+                auto p = recursivelyLookForPattern(input_line.substr(foundSubstringPosition + 1, input_line.length() - v[index].length()), v, index + 1);
+                auto q = recursivelyLookForPattern(input_line.substr(foundSubstringPosition + 1, input_line.length() - v[index].length()), v, index);
 
                 if (p == true || q == true)
                     return true;
@@ -193,7 +223,24 @@ bool recursivelyLookForPattern(const std::string input_line, std::vector<std::st
     }
     else
     {
-        if (v[index] == "\\d")
+        if (v[index][v[index].length() - 1] == '+')
+        {
+            auto foundSubstringPosition = input_line.find(v[index][0]);
+            if (foundSubstringPosition == std::string::npos)
+                return false;
+            else
+            {
+
+                std::string restString = input_line.substr(foundSubstringPosition + 1, input_line.length() - 1);
+                while (restString.length() > 0 && restString[0] == v[index][0])
+                {
+                    restString = restString.substr(1);
+                }
+
+                return recursivelyLookForPattern(restString, v, index + 1);
+            }
+        }
+        else if (v[index] == "\\d")
         {
             auto x = doesStringContainsNumber(input_line);
             if (x != 0)
