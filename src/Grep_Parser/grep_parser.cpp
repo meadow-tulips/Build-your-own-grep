@@ -36,6 +36,10 @@ bool GREP::GREP_PARSER::match_pattern(const std::string &input_line)
                 return doesStringContainsNegativeCharacterGroups(input_line, expression) < 0 ? 0 : 1;
             return doesStringContainsPositiveCharacterGroups(input_line, expression) < 0 ? 0 : 1;
         }
+        else if (expression[0] == '^')
+        {
+            return input_line.find(expression.substr(1, expression.length() - 1)) != 0 ? false : true;
+        }
         return doesStringContainsMatchedPattern(input_line, expression);
     }
 }
