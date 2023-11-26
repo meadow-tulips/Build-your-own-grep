@@ -1,18 +1,6 @@
 #include <iostream>
 #include "Grep_Parser/grep_parser.hpp"
 
-bool match_pattern(const std::string &input_line, const std::string &pattern)
-{
-    if (pattern.length() == 1)
-    {
-        return input_line.find(pattern) != std::string::npos;
-    }
-    else
-    {
-        throw std::runtime_error("Unhandled pattern " + pattern);
-    }
-}
-
 int main(int argc, char *argv[])
 {
     // You can use print statements as follows for debugging, they'll be visible when running tests.

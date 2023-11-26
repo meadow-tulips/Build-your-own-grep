@@ -4,10 +4,11 @@
 #include <cctype>
 
 std::vector<std::string> parseExpressionPattern(std::string expression);
-bool doesStringContainsNumber(const std::string &s);
-bool doesStringContainsAlphaNumericCharacter(const std::string &s);
-bool doesStringContainsPositiveCharacterGroups(const std::string input_value, const std::string grp);
-bool doesStringContainsNegativeCharacterGroups(const std::string input_line, const std::string grp);
+int doesStringContainsNumber(const std::string &s);
+int doesStringContainsAlphaNumericCharacter(const std::string &s);
+int doesStringContainsPositiveCharacterGroups(const std::string input_value, const std::string grp);
+int doesStringContainsNegativeCharacterGroups(const std::string input_line, const std::string grp);
+bool doesStringContainsMatchedPattern(const std::string input_line, const std::string v);
 
 GREP::GREP_PARSER::GREP_PARSER(std::string exp) { expression = exp; }
 
@@ -20,29 +21,21 @@ bool GREP::GREP_PARSER::match_pattern(const std::string &input_line)
     }
     else
     {
-        auto v = parseExpressionPattern(expression);
-        for (int i = 0; i < v.size(); i++)
+        if (expression == "\\d")
         {
-            if (v[i] == "\\d")
-            {
-                return doesStringContainsNumber(input_line);
-            }
-            else if (v[i] == "\\w")
-            {
-                return doesStringContainsAlphaNumericCharacter(input_line);
-            }
-            else if (v[i][0] == '[' && v[i][v[i].length() - 1] == ']')
-            {
-                if (v[i][1] == '^')
-                    return doesStringContainsNegativeCharacterGroups(input_line, v[i]);
-                return doesStringContainsPositiveCharacterGroups(input_line, v[i]);
-            }
-            else
-            {
-                throw std::runtime_error("Unhandled pattern " + v[i]);
-            }
+            return doesStringContainsNumber(input_line) < 0 ? 0 : 1;
         }
-        return 0;
+        else if (expression == "\\w")
+        {
+            return doesStringContainsAlphaNumericCharacter(input_line) < 0 ? 0 : 1;
+        }
+        else if (expression[0] == '[' && expression[expression.length() -  1] == ']')
+        {
+            if (expression[1] == '^')
+                return doesStringContainsNegativeCharacterGroups(input_line, expression) < 0 ? 0 : 1;
+            return doesStringContainsPositiveCharacterGroups(input_line, expression) < 0 ? 0 : 1;
+        }
+        return doesStringContainsMatchedPattern(input_line, expression);
     }
 }
 
@@ -76,45 +69,51 @@ std::vector<std::string> parseExpressionPattern(std::string expression)
     return tokens;
 }
 
-bool doesStringContainsNumber(const std::string &s)
+int doesStringContainsNumber(const std::string &s)
 {
     for (int i = 0; i < s.length(); i++)
     {
         if (isdigit(s[i]))
-            return true;
+            return i;
     }
-    return false;
+    return -1;
 }
 
-bool doesStringContainsAlphaNumericCharacter(const std::string &s)
+int doesStringContainsAlphaNumericCharacter(const std::string &s)
 {
     for (int i = 0; i < s.length(); i++)
     {
         if (isalnum(s[i]))
-            return true;
+            return i;
     }
-    return false;
+    return -1;
 }
 
-bool doesStringContainsPositiveCharacterGroups(const std::string input_line, const std::string grp)
+int doesStringContainsPositiveCharacterGroups(const std::string input_line, const std::string grp)
 {
     for (int i = 1; i < grp.length() - 1; i++)
     {
         if (input_line.find(grp[i]) != std::string::npos)
-            return true;
+            return i;
     }
 
-    return false;
+    return -1;
 }
 
-bool doesStringContainsNegativeCharacterGroups(const std::string input_line, const std::string grp)
+int doesStringContainsNegativeCharacterGroups(const std::string input_line, const std::string grp)
 {
     std::string grpstring = grp.substr(2, grp.length() - 3);
     for (int i = 0; i < input_line.length(); i++)
     {
         if (grpstring.find(input_line[i]) == std::string::npos)
-            return true;
+            return i;
     }
 
-    return false;
+    return -1;
+}
+
+bool doesStringContainsMatchedPattern(const std::string input_line, const std::string expression)
+{
+    auto v = parseExpressionPattern(expression);
+    return 0;
 }
